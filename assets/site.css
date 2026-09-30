@@ -307,3 +307,28 @@ footer a { color: #7A4A3C; }
   .recipe-body { margin: 0; }
   .card { border: 0; padding: 0; }
 }
+
+/* Live dinner status page (/d/) */
+.dn { padding: 50px 0 90px; background: #2A1D15 url("/assets/food/table.jpg") center 18% / cover fixed; min-height: 80vh; }
+.dn .empty { color: #F6EEDF; }
+.dn-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: center; }
+.dn-card { transform: rotate(-1deg); }
+.dn-card h1.hand { font-size: clamp(40px, 6vw, 64px); line-height: 1; margin: 4px 0 8px; color: #2A2320; }
+.dn-title { font: 600 22px var(--serif); margin: 0 0 18px; }
+.dn-ready { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin: 6px 0 14px; }
+.dn-ready span { font: 14px var(--type); text-transform: uppercase; letter-spacing: .08em; color: #8A7B6C; width: 100%; }
+.dn-ready b { font: 700 64px/1 var(--hand); color: var(--accent); }
+.dn-ready em { font: 700 26px var(--hand); font-style: normal; color: #5E4E42; }
+.dn-bar { height: 10px; border-radius: 5px; background: #E6DCCB; overflow: hidden; }
+.dn-bar i { display: block; height: 100%; background: var(--accent); border-radius: 5px; transition: width .6s; }
+.dn-step { font: 15px var(--type); margin: 8px 0 4px; }
+.dn-now { font: 16px/1.5 var(--serif); font-style: italic; margin: 6px 0 12px; }
+.dn-live { color: #5E7F5F !important; }
+.dn-stamp { display: inline-block; font: 40px var(--type); text-transform: uppercase; letter-spacing: .12em; color: var(--accent); border: 4px solid currentColor;
+  padding: 6px 22px; border-radius: 8px; transform: rotate(-6deg); margin: 14px 0 18px; animation: thump .4s cubic-bezier(.3, 1.6, .5, 1) both; }
+@keyframes thump { from { transform: rotate(-6deg) scale(1.8); opacity: 0; } }
+.dn-side { position: relative; }
+.dn-photo { width: 78%; margin: 0 auto; transform: rotate(4deg); box-shadow: 0 26px 40px -14px rgba(0,0,0,.7); }
+.dn-noimg { width: 60%; aspect-ratio: 1; margin: 0 auto; display: grid; place-items: center; font-size: 90px; background: var(--card-paper); transform: rotate(4deg); }
+.dn-note { width: 62%; margin: -24px 0 0 4%; transform: rotate(-3deg); position: relative; }
+@media (max-width: 800px) { .dn-grid { grid-template-columns: 1fr; } .dn-photo { width: 70%; } .dn-ready b { font-size: 52px; } }

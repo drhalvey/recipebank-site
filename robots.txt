@@ -2,4 +2,5 @@ User-agent: *
 Disallow: /my/
 Disallow: /r/
 Disallow: /k/
+Disallow: /d/
 Sitemap: https://recipebank.app/sitemap.xml

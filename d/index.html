@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dinner's on · Recipe Bank</title>
+<meta name="description" content="What's cooking and when it will be ready.">
+<meta property="og:title" content="Dinner's on · Recipe Bank">
+<meta property="og:description" content="What's cooking and when it will be ready.">
+<meta property="og:image" content="https://recipebank.app/assets/og.jpg">
+<meta name="theme-color" content="#EFE5D3">
+<link rel="icon" href="/assets/icon-64.png">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css?v=5">
+<meta name="robots" content="noindex">
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="/"><img src="/assets/icon-64.png" alt="">Recipe Bank</a>
+<nav><a class="hide-sm" href="/#features">Features</a><a class="hide-sm" href="/my/">Web version</a><a href="/support/">Help</a></nav>
+</div></header>
+<main class="scrap dn"><div class="wrap" id="dinner"><div class="empty">Checking the kitchen…</div></div></main>
+<footer><div class="wrap">
+<span>© 2026 Edward Halvey, Perth, Western Australia</span>
+<a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/support/">Support</a><a href="mailto:hello@recipebank.app">hello@recipebank.app</a>
+</div></footer>
+<script>
+(function(){
+  var API = 'https://bbwjroytqxynborrqylr.supabase.co/functions/v1/recipebank/dinner/';
+  var id = (new URLSearchParams(location.search).get('id') || '').replace(/[^A-Za-z0-9]/g, '');
+  var el = document.getElementById('dinner'), last = null;
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function t(d){ return new Date(d).toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'}); }
+  function until(d){ var m = Math.round((new Date(d) - Date.now()) / 60000);
+    if (m <= 0) return 'any minute now'; if (m < 60) return 'in ' + m + ' minute' + (m == 1 ? '' : 's');
+    var h = Math.floor(m / 60), r = m % 60; return 'in ' + h + ' h' + (r ? ' ' + r + ' min' : ''); }
+  function ago(d){ var m = Math.round((Date.now() - new Date(d)) / 60000); return m < 1 ? 'just now' : m + ' min ago'; }
+  function render(d){
+    last = d;
+    var who = d.person ? esc(d.person) : 'Someone', whom = d.for_whom ? esc(d.for_whom) : 'you';
+    var pct = d.steps ? Math.min(100, Math.round(100 * Math.min(d.step, d.steps) / d.steps)) : 0;
+    var photo = d.photo ? '<figure class="polaroid tape dn-photo"><img src="' + esc(d.photo) + '" alt=""><figcaption>' + esc(d.title) + '</figcaption></figure>'
+                        : '<div class="dn-noimg">🍽</div>';
+    var stale = !d.done && (Date.now() - new Date(d.updated_at)) > 30 * 60000;
+    document.title = (d.done ? "Dinner's ready · " : "Dinner's on · ") + (d.title || 'Recipe Bank');
+    el.innerHTML =
+      '<div class="dn-grid">' +
+        '<div class="note-card dn-card">' +
+          '<span class="kicker">' + (d.done ? "Dinner's ready" : "Dinner's on") + '</span>' +
+          '<h1 class="hand">' + who + (d.done ? ' says come and get it!' : ' is cooking for ' + whom) + '</h1>' +
+          '<p class="dn-title">' + esc(d.title) + '</p>' +
+          (d.done ? '<div class="dn-stamp">Ready</div>' :
+            '<div class="dn-ready"><span>Ready about</span><b>' + (d.ready_at ? t(d.ready_at) : 'soon') + '</b>' +
+              (d.ready_at ? '<em>' + until(d.ready_at) + '</em>' : '') + '</div>' +
+            (d.steps ? '<div class="dn-bar"><i style="width:' + pct + '%"></i></div><p class="dn-step">' +
+              (d.step == 0 ? 'Getting the ingredients out' : d.step > d.steps ? 'Finishing up' : 'Step ' + d.step + ' of ' + d.steps) + '</p>' : '') +
+            (d.step_text && d.step > 0 && d.step <= d.steps ? '<p class="dn-now">Now: ' + esc(d.step_text) + '</p>' : '')) +
+          (stale ? '<p class="small muted">Last update ' + ago(d.updated_at) + '.</p>' : '<p class="small muted dn-live">● live, updates by itself</p>') +
+        '</div>' +
+        '<div class="dn-side">' + photo + (d.note ? '<div class="sticky dn-note"><b>Note</b><span>' + esc(d.note) + '</span></div>' : '') + '</div>' +
+      '</div>';
+  }
+  function load(){
+    if (!id) { el.innerHTML = '<div class="empty">This link is missing its code.</div>'; return; }
+    fetch(API + id, {cache: 'no-store'}).then(function(r){ if (!r.ok) throw r.status; return r.json(); }).then(render)
+      .catch(function(e){ if (e === 404 && !last) el.innerHTML = '<div class="empty"><h1 class="hand">Nothing cooking here</h1><p>This dinner link has finished or expired.</p></div>'; });
+  }
+  load(); setInterval(load, 30000); setInterval(function(){ if (last) render(last); }, 30000);
+})();
+</script>
+</body>
+</html>
