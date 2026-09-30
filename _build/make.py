@@ -17,7 +17,7 @@ def head(title, desc, extra=""):
 <link rel="icon" href="/assets/icon-64.png">
 <link rel="apple-touch-icon" href="/assets/icon-180.png">
 {FONTS}
-<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/site.css?v=2">
 {extra}
 </head>
 <body>
