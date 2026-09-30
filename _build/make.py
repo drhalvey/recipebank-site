@@ -2,11 +2,15 @@ import os, pathlib
 SITE = pathlib.Path(__file__).resolve().parent.parent
 FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Special+Elite&display=swap" rel="stylesheet">'
 
-def head(title, desc, extra=""):
+GA = """<script async src="https://www.googletagmanager.com/gtag/js?id=G-C3EH7R542Y"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-C3EH7R542Y');</script>"""
+
+def head(title, desc, extra="", analytics=True):
     return f'''<!doctype html>
 <html lang="en-AU">
 <head>
 <meta charset="utf-8">
+{GA if analytics else ""}
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{title}</title>
 <meta name="description" content="{desc}">
@@ -34,10 +38,10 @@ FOOT = '''<footer><div class="wrap">
 </div></footer>
 '''
 
-def page(path, title, desc, body, extra_head="", scripts="", top=True, foot=True):
+def page(path, title, desc, body, extra_head="", scripts="", top=True, foot=True, analytics=True):
     p = SITE / path
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(head(title, desc, extra_head) + (TOP if top else "") + body + (FOOT if foot else "") + scripts + "\n</body>\n</html>\n")
+    p.write_text(head(title, desc, extra_head, analytics) + (TOP if top else "") + body + (FOOT if foot else "") + scripts + "\n</body>\n</html>\n")
 
 polaroid = lambda f, cap, cls="": f'<figure class="polaroid tape {cls}"><img src="/assets/food/{f}.jpg" alt="{cap}" loading="lazy" width="800" height="800"><figcaption>{cap}</figcaption></figure>'
 card = lambda n, t, d: f'<article class="icard"><span class="no">No. {n}</span><h3>{t}</h3><p>{d}</p></article>'
@@ -124,7 +128,7 @@ f'''<main class="scrap">
 </div></section>
 
 <section class="s-private"><div class="wrap">
-  <div class="stamps" aria-hidden="true"><span>No ads</span><span>No account</span><span>No tracking</span></div>
+  <div class="stamps" aria-hidden="true"><span>No ads</span><span>No account</span><span>Nothing sold</span></div>
   <p>Your recipes live on your iPhone. They only leave it when you ask: to read a recipe with AI, to share one, or to switch on the web version. <a href="/privacy/">The privacy policy</a> says exactly how.</p>
   <p><a class="stamp-btn" href="mailto:hello@recipebank.app?subject=Recipe%20Bank%20early%20access">Get early access</a></p>
 </div></section>
@@ -136,7 +140,7 @@ page("privacy/index.html", "Privacy policy · Recipe Bank", "How Recipe Bank han
 <p class="eyebrow">Privacy policy</p>
 <h1>Your recipes are yours.</h1>
 <p class="muted">Last updated 30 September 2026</p>
-<div class="note"><b>In short:</b> no account, no ads, no tracking, no selling of anything. Your recipes are stored on your iPhone. Information leaves your phone only when you use a feature that needs it, and only for that purpose.</div>
+<div class="note"><b>In short:</b> no account, no ads, nothing tracked inside the app, nothing sold. Your recipes are stored on your iPhone. This website counts its visitors with Google Analytics (see below). Information leaves your phone only when you use a feature that needs it, and only for that purpose.</div>
 
 <h2>Who we are</h2>
 <p>Recipe Bank is made by Edward Halvey in Perth, Western Australia ("we"). Contact: <a href="mailto:hello@recipebank.app">hello@recipebank.app</a>. We handle personal information in line with the Australian Privacy Principles.</p>
@@ -149,7 +153,7 @@ page("privacy/index.html", "Privacy policy · Recipe Bank", "How Recipe Bank han
 
 <h2>What is sent, and why</h2>
 <ul>
-<li><b>Reading and writing recipes with AI.</b> When you import a recipe, ask for swaps, adapt a recipe, translate it, work out nutrition, get ideas, plan meals, time several dishes or build a shopping list, the text, link, photo or video you chose is sent to our server (hosted by Cloudflare) and on to Google's Gemini AI to be processed. We do not keep it after the answer comes back. Google's free service may use content sent to it to improve its products, so please do not put anything private in a recipe.</li>
+<li><b>Reading and writing recipes with AI.</b> When you import a recipe, ask for swaps, adapt a recipe, translate it, work out nutrition, get ideas, plan meals, time several dishes or build a shopping list, the text, link or photo you chose is sent to our servers (hosted by Supabase and Cloudflare) and on to Google's Gemini AI to be processed. We do not keep it after the answer comes back. This goes to Google's paid service, which does not use it to train its models. Videos, and requests on the rare days our paid allowance runs out, go to Google's free service, which may use content to improve its products, so please do not put anything private in a recipe.</li>
 <li><b>Cover pictures.</b> When a recipe has no photo, its title and main ingredients are sent to Cloudflare's image AI to draw one.</li>
 <li><b>Sharing a recipe.</b> When you share a recipe as a link, that recipe (and its photo) is stored on our server for up to two years so the link works. Anyone who has the link can see that recipe.</li>
 <li><b>The web version (optional, off unless you turn it on).</b> A copy of your recipes and their photos is stored with Supabase, a cloud database, behind a long private link. Anyone with the link can view your recipes, so share it only with people you trust. Turning the web version off deletes the web copy.</li>
@@ -158,7 +162,9 @@ page("privacy/index.html", "Privacy policy · Recipe Bank", "How Recipe Bank han
 </ul>
 
 <h2>What we collect about you</h2>
-<p>Nothing that identifies you. Our server counts how many requests it handles each day so it can share the free AI fairly and stop abuse. We do not use analytics, advertising identifiers or tracking, and we do not sell or share information with anyone except the service providers named above, only to run those features.</p>
+<p><b>In the app:</b> nothing that identifies you. Our server counts how many AI requests it handles each day, with a random code for each installation, so it can share the AI fairly and stop abuse. The app has no analytics, advertising identifiers or tracking.</p>
+<p><b>On this website:</b> we use Google Analytics to count visits and see which pages are useful: pages viewed, the type of device and browser, the country and city a visit comes from, and how the visitor found the site. Google Analytics sets cookies in your browser to do this. It does not give us your name or contact details, and Google does not store your full IP address. It is switched off on the web version of your recipes (recipebank.app/my/), so your private link and your recipes are never sent to it. You can block these cookies in your browser settings or with <a href="https://tools.google.com/dlpage/gaoptout">Google's opt-out add-on</a>.</p>
+<p>We do not sell or share information with anyone except the service providers named above, and only to run those features.</p>
 
 <h2>Children</h2>
 <p>Recipe Bank is a general cooking app for adults and families. It is not designed for children to use on their own.</p>
@@ -234,7 +240,7 @@ page("support/index.html", "Help and support · Recipe Bank", "Answers to common
 <p>The AI in Recipe Bank is free and shared. At busy times it may take a little longer or ask you to try again in a minute. Everything you have already saved works without it.</p>
 
 <h2>Privacy</h2>
-<p>See the <a href="/privacy/">privacy policy</a>. In short: no account, no ads, no tracking.</p>
+<p>See the <a href="/privacy/">privacy policy</a>. In short: no account, no ads, nothing sold.</p>
 </div></main>
 ''')
 print("pages done")
@@ -367,7 +373,7 @@ MY_JS = '''<script src="/assets/rb.js"></script>
 })();
 </script>'''
 page("my/index.html", "My recipes · Recipe Bank", "Your Recipe Bank recipes in the browser.",
-     '<main id="app"><div class="empty">Loading…</div></main>\n', extra_head='<meta name="robots" content="noindex">', scripts=MY_JS)
+     '<main id="app"><div class="empty">Loading…</div></main>\n', extra_head='<meta name="robots" content="noindex">', scripts=MY_JS, analytics=False)
 
 # ---------- Plumbing ----------
 (SITE / "CNAME").write_text("recipebank.app\n")
