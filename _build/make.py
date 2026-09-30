@@ -21,7 +21,7 @@ def head(title, desc, extra="", analytics=True):
 <link rel="icon" href="/assets/icon-64.png">
 <link rel="apple-touch-icon" href="/assets/icon-180.png">
 {FONTS}
-<link rel="stylesheet" href="/assets/site.css?v=3">
+<link rel="stylesheet" href="/assets/site.css?v=4">
 {extra}
 </head>
 <body>
@@ -46,6 +46,19 @@ def page(path, title, desc, body, extra_head="", scripts="", top=True, foot=True
 polaroid = lambda f, cap, cls="": f'<figure class="polaroid tape {cls}"><img src="/assets/food/{f}.jpg" alt="{cap}" loading="lazy" width="800" height="800"><figcaption>{cap}</figcaption></figure>'
 card = lambda n, t, d: f'<article class="icard"><span class="no">No. {n}</span><h3>{t}</h3><p>{d}</p></article>'
 shot = lambda f, cap: f'<figure class="print tape"><img src="/assets/shots/{f}.jpg" alt="{cap}" loading="lazy" width="600" height="1303"><figcaption>{cap}</figcaption></figure>'
+HERO_JS = """<script>
+(function(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var items = [].slice.call(document.querySelectorAll('.collage [data-depth]'));
+  var hero = document.querySelector('.s-hero'), ticking = false;
+  function move(){ var y = Math.min(scrollY, hero.offsetHeight);
+    items.forEach(function(el){ el.style.setProperty('--py', (-y * el.dataset.depth / 100) + 'px'); }); ticking = false; }
+  addEventListener('scroll', function(){ if (!ticking) { ticking = true; requestAnimationFrame(move); } }, {passive: true});
+  var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, {rootMargin: '0px 0px -8% 0px'});
+  document.querySelectorAll('.icard, .dinner-card, .dinner-photos .polaroid, .notebook, .m1, .stamps span').forEach(function(el, i){ el.classList.add('reveal'); io.observe(el); });
+})();
+</script>"""
+TICK = "".join(f"<span>{t}</span><i>✦</i>" for t in ["Saved from Instagram", "a TikTok", "a YouTube video", "Nan's recipe card", "the back of the packet", "a 1987 cookbook", "a screenshot", "a Facebook post", "a food blog, minus the life story", "a photo of the fridge"])
 ARROW = '<svg class="arrow" viewBox="0 0 120 70" aria-hidden="true"><path d="M4 8 C 40 4, 78 18, 96 50" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M84 46 L97 53 L100 38" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
 # ---------- Landing ----------
@@ -53,8 +66,9 @@ page("index.html", "Recipe Bank: every recipe you love, in one place",
  "Save recipes from any website, video, screenshot or message. Swap ingredients, make any recipe dairy-free or high protein, cook hands-free and shop at Coles or Woolworths.",
 f'''<main class="scrap">
 <section class="s-hero"><div class="wrap">
-  <div class="s-hero-text">
-    <h1>Every recipe you love, <span class="scribble">in one tin.</span></h1>
+  <div class="s-hero-text note-card drop" style="--r:-1.2deg;--d:.05s">
+    <span class="kicker">Recipe Bank · for iPhone</span>
+    <h1>Every recipe you love, <span class="scribble">in one tin.<svg class="ul" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 15 C 60 5, 120 20, 180 10 S 270 8, 297 13"/><path pathLength="1" class="ul2" d="M20 20 C 90 12, 170 22, 285 16"/></svg></span></h1>
     <p class="lead">The screenshot of that TikTok pasta. Nan's banana bread. The curry off the back of the packet. Recipe Bank reads them all and writes them out as clean, simple recipes you can scale, swap, cook hands-free and shop for.</p>
     <div class="cta">
       <a class="stamp-btn" href="mailto:hello@recipebank.app?subject=Recipe%20Bank%20early%20access">Get early access</a>
@@ -62,12 +76,16 @@ f'''<main class="scrap">
     </div>
   </div>
   <div class="collage" aria-hidden="true">
-    {polaroid("ragu", "Sunday ragu", "c1")}
-    {polaroid("bananabread", "Nan's banana bread", "c2")}
-    <div class="print tape c3"><img src="/assets/shots/recipe.jpg" alt="" width="600" height="1303"></div>
-    <div class="sticky c4"><b>Saved this week</b><span>✓ that TikTok pasta</span><span>✓ Nan's banana bread</span><span>✓ pumpkin soup (no cream!)</span><span>✓ the good cookies</span></div>
+    <div class="drop c1" style="--r:-6deg;--d:.35s" data-depth="18">{polaroid("ragu", "Sunday ragu")}</div>
+    <div class="drop c3" style="--r:4deg;--d:.55s" data-depth="30"><div class="print tape"><img src="/assets/shots/recipe.jpg" alt="" width="600" height="1303"></div></div>
+    <div class="drop c2" style="--r:5deg;--d:.75s" data-depth="12">{polaroid("bananabread", "Nan's banana bread")}</div>
+    <div class="drop c4" style="--r:-2.5deg;--d:.95s" data-depth="24"><div class="sticky"><b>Saved this week</b><span>✓ that TikTok pasta</span><span>✓ Nan's banana bread</span><span>✓ pumpkin soup (no cream!)</span><span>✓ the good cookies</span></div></div>
   </div>
-</div></section>
+</div>
+<a class="scroll-cue" href="#features" aria-label="See what it does">what's in the tin ↓</a>
+</section>
+
+<div class="ticker" aria-label="Recipe Bank reads recipes from Instagram, TikTok, YouTube, websites, screenshots, cookbooks and handwritten cards"><div class="ticker-track" aria-hidden="true">{TICK}{TICK}</div></div>
 
 <section class="s-tin" id="features"><div class="wrap">
   <h2 class="hand">What's in the tin</h2>
@@ -133,7 +151,7 @@ f'''<main class="scrap">
   <p><a class="stamp-btn" href="mailto:hello@recipebank.app?subject=Recipe%20Bank%20early%20access">Get early access</a></p>
 </div></section>
 </main>
-''')
+''', scripts=HERO_JS)
 
 # ---------- Privacy ----------
 page("privacy/index.html", "Privacy policy · Recipe Bank", "How Recipe Bank handles your recipes and information.", '''<main class="doc"><div class="narrow">
