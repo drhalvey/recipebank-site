@@ -175,6 +175,7 @@ page("privacy/index.html", "Privacy policy · Recipe Bank", "How Recipe Bank han
 <li><b>Cover pictures.</b> When a recipe has no photo, its title and main ingredients are sent to Cloudflare's image AI to draw one.</li>
 <li><b>Sharing a recipe.</b> When you share a recipe as a link, that recipe (and its photo) is stored on our server for up to two years so the link works. Anyone who has the link can see that recipe.</li>
 <li><b>The web version (optional, off unless you turn it on).</b> A copy of your recipes and their photos is stored with Supabase, a cloud database, behind a long private link. Anyone with the link can view your recipes, so share it only with people you trust. Turning the web version off deletes the web copy.</li>
+<li><b>Kitchen (optional, off unless you set it up).</b> If you join a household kitchen and switch on "Share what I'm cooking", the name you chose, the title of the recipe and the step you are on are sent to our server (Supabase) while cook mode is open, so the others in that kitchen can see them. Nothing else is shared, and it is removed when you leave the kitchen. Seeing what others cook does not share your own.</li>
 <li><b>Apple Health (optional).</b> When you tap "Log this meal", the nutrition figures for that serve are written to Apple Health. Recipe Bank never reads your health data.</li>
 <li><b>Shopping at Coles or Woolworths.</b> Their websites open inside the app. What you do there, including signing in and your trolley, is between you and them under their own privacy policies; we do not see it.</li>
 </ul>
@@ -393,13 +394,32 @@ MY_JS = '''<script src="/assets/rb.js"></script>
 page("my/index.html", "My recipes · Recipe Bank", "Your Recipe Bank recipes in the browser.",
      '<main id="app"><div class="empty">Loading…</div></main>\n', extra_head='<meta name="robots" content="noindex">', scripts=MY_JS, analytics=False)
 
+# ---------- Kitchen invitation (opens the app when installed) ----------
+page("k/index.html", "Join a kitchen · Recipe Bank", "An invitation to share a kitchen in Recipe Bank.", '''<main class="doc"><div class="narrow" style="text-align:center">
+<h1 class="hand" style="font-size:56px">You're invited to a kitchen</h1>
+<p id="who" class="muted">Someone wants to share what they're cooking with you in Recipe Bank.</p>
+<div class="note" style="text-align:left">
+<p><b>On your iPhone with Recipe Bank:</b> open this link on the iPhone and it opens the app, which asks if you want to join.</p>
+<p>Or in the app go to <b>Settings, Kitchen, Join with a code</b> and type:</p>
+<p style="font:28px var(--type);letter-spacing:.12em;text-align:center;margin:10px 0" id="code">…</p>
+</div>
+<p class="small muted">Joining lets you see what the others are cooking. Your own cooking is only shared if you switch that on.</p>
+</div></main>
+''', extra_head='<meta name="robots" content="noindex">', analytics=False, scripts='''<script>
+(function(){ var q = new URLSearchParams(location.search), c = (q.get('c')||'').toUpperCase().replace(/[^A-Z0-9]/g,''), n = (q.get('n')||'').slice(0,40);
+  document.getElementById('code').textContent = c || 'no code in this link';
+  if (n) document.getElementById('who').textContent = n + ' wants to share what they are cooking with you in Recipe Bank.';
+  location.href = 'recipebank://kitchen?c=' + encodeURIComponent(c) + (n ? '&n=' + encodeURIComponent(n) : '');
+})();
+</script>''')
+
 # ---------- Plumbing ----------
 (SITE / "CNAME").write_text("recipebank.app\n")
 (SITE / ".nojekyll").write_text("")
 wk = SITE / ".well-known"; wk.mkdir(exist_ok=True)
-aasa = '{"applinks":{"details":[{"appIDs":["7Q53G3JR9B.au.com.drhalvey.recipes"],"components":[{"/":"/r/*","comment":"Shared recipes"}]}]}}\n'
+aasa = '{"applinks":{"details":[{"appIDs":["7Q53G3JR9B.au.com.drhalvey.recipes"],"components":[{"/":"/r/*","comment":"Shared recipes"},{"/":"/k/*","comment":"Kitchen invitations"}]}]}}\n'
 (wk / "apple-app-site-association").write_text(aasa)
-(SITE / "robots.txt").write_text("User-agent: *\nDisallow: /my/\nDisallow: /r/\nSitemap: https://recipebank.app/sitemap.xml\n")
+(SITE / "robots.txt").write_text("User-agent: *\nDisallow: /my/\nDisallow: /r/\nDisallow: /k/\nSitemap: https://recipebank.app/sitemap.xml\n")
 (SITE / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   "".join(f"<url><loc>https://recipebank.app{p}</loc></url>\n" for p in ["/", "/privacy/", "/terms/", "/support/"]) + "</urlset>\n")
 print("my + plumbing done")

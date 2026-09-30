@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Join a kitchen · Recipe Bank</title>
+<meta name="description" content="An invitation to share a kitchen in Recipe Bank.">
+<meta property="og:title" content="Join a kitchen · Recipe Bank">
+<meta property="og:description" content="An invitation to share a kitchen in Recipe Bank.">
+<meta property="og:image" content="https://recipebank.app/assets/og.jpg">
+<meta name="theme-color" content="#EFE5D3">
+<link rel="icon" href="/assets/icon-64.png">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css?v=4">
+<meta name="robots" content="noindex">
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="/"><img src="/assets/icon-64.png" alt="">Recipe Bank</a>
+<nav><a class="hide-sm" href="/#features">Features</a><a class="hide-sm" href="/my/">Web version</a><a href="/support/">Help</a></nav>
+</div></header>
+<main class="doc"><div class="narrow" style="text-align:center">
+<h1 class="hand" style="font-size:56px">You're invited to a kitchen</h1>
+<p id="who" class="muted">Someone wants to share what they're cooking with you in Recipe Bank.</p>
+<div class="note" style="text-align:left">
+<p><b>On your iPhone with Recipe Bank:</b> open this link on the iPhone and it opens the app, which asks if you want to join.</p>
+<p>Or in the app go to <b>Settings, Kitchen, Join with a code</b> and type:</p>
+<p style="font:28px var(--type);letter-spacing:.12em;text-align:center;margin:10px 0" id="code">…</p>
+</div>
+<p class="small muted">Joining lets you see what the others are cooking. Your own cooking is only shared if you switch that on.</p>
+</div></main>
+<footer><div class="wrap">
+<span>© 2026 Edward Halvey, Perth, Western Australia</span>
+<a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/support/">Support</a><a href="mailto:hello@recipebank.app">hello@recipebank.app</a>
+</div></footer>
+<script>
+(function(){ var q = new URLSearchParams(location.search), c = (q.get('c')||'').toUpperCase().replace(/[^A-Z0-9]/g,''), n = (q.get('n')||'').slice(0,40);
+  document.getElementById('code').textContent = c || 'no code in this link';
+  if (n) document.getElementById('who').textContent = n + ' wants to share what they are cooking with you in Recipe Bank.';
+  location.href = 'recipebank://kitchen?c=' + encodeURIComponent(c) + (n ? '&n=' + encodeURIComponent(n) : '');
+})();
+</script>
+</body>
+</html>
