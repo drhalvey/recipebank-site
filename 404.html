@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Recipe Bank</title>
+<meta name="description" content="Recipe Bank">
+<meta property="og:title" content="Recipe Bank">
+<meta property="og:description" content="Recipe Bank">
+<meta property="og:image" content="https://recipebank.app/assets/og.jpg">
+<meta name="theme-color" content="#F7F1E8">
+<link rel="icon" href="/assets/icon-64.png">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="/"><img src="/assets/icon-64.png" alt="">Recipe Bank</a>
+<nav><a class="hide-sm" href="/#features">Features</a><a class="hide-sm" href="/my/">Web version</a><a href="/support/">Help</a></nav>
+</div></header>
+<main id="app"><div class="empty">Loading…</div></main>
+<footer><div class="wrap">
+<span>© 2026 Edward Halvey, Perth, Western Australia</span>
+<a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/support/">Support</a><a href="mailto:hello@recipebank.app">hello@recipebank.app</a>
+</div></footer>
+<script>
+if (!/^\/r\/[A-Za-z0-9]{6,16}\/?$/.test(location.pathname)) {
+  document.getElementById("app").innerHTML = '<div class="empty"><h2>Page not found</h2><p><a class="btn" href="/">Go to Recipe Bank</a></p></div>';
+}
+</script>
+<script src="/assets/rb.js"></script>
+<script>
+(async () => { if (!/^\/r\//.test(location.pathname)) return;
+  const el = document.getElementById("app");
+  const m = location.pathname.match(/\/r\/([A-Za-z0-9]{6,16})\/?$/);
+  const id = new URLSearchParams(location.search).get("id") || (m && m[1]);
+  if (!id || !/^[A-Za-z0-9]{6,16}$/.test(id)) { el.innerHTML = '<div class="empty"><h2>Recipe not found</h2><p>This link looks incomplete.</p></div>'; return; }
+  try {
+    const r = await fetch(RB.API + "/r/" + id);
+    if (!r.ok) throw new Error(r.status);
+    const file = await r.json();
+    const recipe = file.recipe;
+    document.title = recipe.title + " · Recipe Bank";
+    const img = file.image ? "https://recipe-bank-relay.ejhalvey.workers.dev/r/" + id + ".jpg" : recipe.imageURL;
+    RB.render(el, recipe, { image: img,
+      extraActions: '<a class="btn ghost" href="recipebank://r/' + id + '">Open in Recipe Bank</a>' });
+    const note = document.createElement("div");
+    note.className = "narrow";
+    note.innerHTML = '<div class="note" style="margin-top:6px"><b>Shared from Recipe Bank.</b> Save recipes from any website, video or screenshot, swap ingredients and cook hands-free. <a href="/">Find out more</a>.</div>';
+    el.appendChild(note);
+  } catch (e) {
+    el.innerHTML = '<div class="empty"><h2>Recipe not found</h2><p>This link has expired or was typed wrongly.</p><p><a class="btn" href="/">About Recipe Bank</a></p></div>';
+  }
+})();
+</script>
+</body>
+</html>

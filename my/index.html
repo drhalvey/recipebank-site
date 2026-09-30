@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My recipes · Recipe Bank</title>
+<meta name="description" content="Your Recipe Bank recipes in the browser.">
+<meta property="og:title" content="My recipes · Recipe Bank">
+<meta property="og:description" content="Your Recipe Bank recipes in the browser.">
+<meta property="og:image" content="https://recipebank.app/assets/og.jpg">
+<meta name="theme-color" content="#F7F1E8">
+<link rel="icon" href="/assets/icon-64.png">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<meta name="robots" content="noindex">
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="/"><img src="/assets/icon-64.png" alt="">Recipe Bank</a>
+<nav><a class="hide-sm" href="/#features">Features</a><a class="hide-sm" href="/my/">Web version</a><a href="/support/">Help</a></nav>
+</div></header>
+<main id="app"><div class="empty">Loading…</div></main>
+<footer><div class="wrap">
+<span>© 2026 Edward Halvey, Perth, Western Australia</span>
+<a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/support/">Support</a><a href="mailto:hello@recipebank.app">hello@recipebank.app</a>
+</div></footer>
+<script src="/assets/rb.js"></script>
+<script>
+(() => {
+  const app = document.getElementById("app");
+  let data = null, key = null, query = "", filter = "all";
+  const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+                  set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} } };
+
+  function askForLink(msg) {
+    app.innerHTML = `<div class="narrow doc"><p class="eyebrow">Web version</p><h1>Your recipes, in any browser.</h1>
+      ${msg ? `<div class="note">${RB.esc(msg)}</div>` : ""}
+      <p class="muted">In the Recipe Bank app, open Settings, then Web version, and turn it on. Open the link it gives you on this computer, or paste it here.</p>
+      <form id="f" class="search" style="margin:18px 0"><input id="k" placeholder="Paste your web version link" autocomplete="off"><button class="btn small">Open</button></form>
+      <p class="small muted">The link is private: anyone who has it can see your recipes. This browser remembers it until you sign out below.</p></div>`;
+    document.getElementById("f").onsubmit = (e) => { e.preventDefault();
+      const v = document.getElementById("k").value.trim(); const m = v.match(/[A-Za-z0-9_-]{24,64}$/) || v.match(/#([A-Za-z0-9_-]{24,64})/);
+      if (m) location.hash = (m[1] || m[0]); };
+  }
+
+  async function load() {
+    const h = location.hash.slice(1).split("/");
+    key = h[0] || store.get("rb.key");
+    if (!key || !/^[A-Za-z0-9_-]{24,64}$/.test(key)) return askForLink();
+    if (!data || data.key !== key) {
+      app.innerHTML = '<div class="empty">Loading your recipes…</div>';
+      try {
+        const r = await fetch(RB.API + "/lib/" + key, { cache: "no-store" });
+        if (r.status === 404) { store.set("rb.key", null); return askForLink("That link is not active. The web version may have been turned off in the app."); }
+        if (!r.ok) throw new Error(r.status);
+        data = await r.json(); data.key = key;
+        store.set("rb.key", key);
+      } catch (e) { app.innerHTML = '<div class="empty"><h2>Could not load your recipes</h2><p>Check the internet connection and try again.</p></div>'; return; }
+    }
+    const id = h[1];
+    const recipe = id && data.recipes.find((x) => x.id === id);
+    recipe ? showRecipe(recipe) : showList();
+  }
+
+  const imgOf = (r) => r.imageFile ? data.images + r.imageFile : (r.imageURL || null);
+
+  function showList() {
+    document.title = (data.name ? data.name + " · " : "") + "Recipe Bank";
+    const all = data.recipes.slice().sort((a, b) => (b.added || "").localeCompare(a.added || ""));
+    const tags = {};
+    all.forEach((r) => (r.tags || []).forEach((t) => tags[t] = (tags[t] || 0) + 1));
+    const top = Object.entries(tags).sort((a, b) => b[1] - a[1]).slice(0, 12).map((x) => x[0]);
+    app.innerHTML = `<div class="wrap">
+      <div class="lib-top"><div><p class="eyebrow">${RB.esc(data.name || "My recipes")}</p><h1 style="margin:0">Recipe Bank</h1>
+      <p class="muted small" style="margin:4px 0 0">${all.length} recipe${all.length === 1 ? "" : "s"} · updated ${new Date(data.updated_at).toLocaleString("en-AU", { dateStyle: "medium", timeStyle: "short" })}</p></div></div>
+      <div class="lib-top"><label class="search">🔍<input id="q" placeholder="Search recipes or ingredients" value="${RB.esc(query)}"></label></div>
+      <div class="chips" id="chips"></div>
+      <div class="grid" id="grid"></div>
+      <p class="small muted" style="margin-top:36px">Changes are made in the app on your iPhone and appear here a few seconds later. <a href="#" id="out">Forget this link on this browser</a></p>
+    </div>`;
+    const chips = [["all", "All"], ...(all.some((r) => r.favourite) ? [["fav", "♥ Favourites"]] : []), ...top.map((t) => ["tag:" + t, t[0].toUpperCase() + t.slice(1)])];
+    const chipsEl = document.getElementById("chips");
+    const draw = () => {
+      chipsEl.innerHTML = chips.map(([k, l]) => `<button class="chip ${filter === k ? "on" : ""}" data-f="${RB.esc(k)}">${RB.esc(l)}</button>`).join("");
+      const q = query.toLowerCase();
+      const shown = all.filter((r) => {
+        if (filter === "fav" && !r.favourite) return false;
+        if (filter.startsWith("tag:") && !(r.tags || []).includes(filter.slice(4))) return false;
+        if (!q) return true;
+        const hay = (r.title + " " + (r.tags || []).join(" ") + " " + (r.groups || []).flatMap((g) => g.items || []).map((i) => i.name).join(" ")).toLowerCase();
+        return q.split(/\s+/).every((w) => hay.includes(w));
+      });
+      document.getElementById("grid").innerHTML = shown.length ? shown.map((r) => {
+        const t = (r.prepMinutes || 0) + (r.cookMinutes || 0); const img = imgOf(r);
+        return `<a class="tile" href="#${key}/${r.id}"><div class="img">${img ? `<img src="${RB.esc(img)}" alt="" loading="lazy">` : RB.emoji(r)}</div>
+          <h3>${RB.esc(r.title)}</h3><div class="muted">${[t ? RB.mins(t) : "", r.favourite ? "♥" : ""].filter(Boolean).join(" · ")}</div></a>`;
+      }).join("") : '<div class="empty">Nothing matches that.</div>';
+    };
+    chipsEl.onclick = (e) => { const b = e.target.closest("[data-f]"); if (b) { filter = b.dataset.f; draw(); } };
+    document.getElementById("q").oninput = (e) => { query = e.target.value; draw(); };
+    document.getElementById("out").onclick = (e) => { e.preventDefault(); store.set("rb.key", null); data = null; location.hash = ""; askForLink(); };
+    draw();
+    window.scrollTo(0, 0);
+  }
+
+  function showRecipe(r) {
+    document.title = r.title + " · Recipe Bank";
+    RB.render(app, r, { image: imgOf(r), back: "All recipes", onBack: () => { location.hash = key; } });
+    window.scrollTo(0, 0);
+  }
+
+  window.addEventListener("hashchange", load);
+  load();
+})();
+</script>
+</body>
+</html>

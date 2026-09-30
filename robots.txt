@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /my/
+Disallow: /r/
+Sitemap: https://recipebank.app/sitemap.xml
