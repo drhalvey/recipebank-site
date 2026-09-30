@@ -1,6 +1,6 @@
 import os, pathlib
 SITE = pathlib.Path(__file__).resolve().parent.parent
-FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">'
+FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Special+Elite&display=swap" rel="stylesheet">'
 
 def head(title, desc, extra=""):
     return f'''<!doctype html>
@@ -13,11 +13,11 @@ def head(title, desc, extra=""):
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
 <meta property="og:image" content="https://recipebank.app/assets/og.jpg">
-<meta name="theme-color" content="#F7F1E8">
+<meta name="theme-color" content="#EFE5D3">
 <link rel="icon" href="/assets/icon-64.png">
 <link rel="apple-touch-icon" href="/assets/icon-180.png">
 {FONTS}
-<link rel="stylesheet" href="/assets/site.css?v=2">
+<link rel="stylesheet" href="/assets/site.css?v=3">
 {extra}
 </head>
 <body>
@@ -39,76 +39,94 @@ def page(path, title, desc, body, extra_head="", scripts="", top=True, foot=True
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(head(title, desc, extra_head) + (TOP if top else "") + body + (FOOT if foot else "") + scripts + "\n</body>\n</html>\n")
 
-feature = lambda ic, t, d: f'<div class="feature"><div class="ic">{ic}</div><h3>{t}</h3><p>{d}</p></div>'
-shot = lambda f, cap: f'<figure><div class="phone"><img src="/assets/shots/{f}.jpg" alt="{cap}" loading="lazy" width="600" height="1303"></div><figcaption>{cap}</figcaption></figure>'
+polaroid = lambda f, cap, cls="": f'<figure class="polaroid tape {cls}"><img src="/assets/food/{f}.jpg" alt="{cap}" loading="lazy" width="800" height="800"><figcaption>{cap}</figcaption></figure>'
+card = lambda n, t, d: f'<article class="icard"><span class="no">No. {n}</span><h3>{t}</h3><p>{d}</p></article>'
+shot = lambda f, cap: f'<figure class="print tape"><img src="/assets/shots/{f}.jpg" alt="{cap}" loading="lazy" width="600" height="1303"><figcaption>{cap}</figcaption></figure>'
+ARROW = '<svg class="arrow" viewBox="0 0 120 70" aria-hidden="true"><path d="M4 8 C 40 4, 78 18, 96 50" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M84 46 L97 53 L100 38" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
 # ---------- Landing ----------
 page("index.html", "Recipe Bank: every recipe you love, in one place",
  "Save recipes from any website, video, screenshot or message. Swap ingredients, make any recipe dairy-free or high protein, cook hands-free and shop at Coles or Woolworths.",
-f'''<main>
-<section class="hero"><div class="wrap">
-  <div>
-    <p class="eyebrow">For home cooks in Australia</p>
-    <h1>Every recipe you love, in one place.</h1>
-    <p class="lead">Save recipes from any website, YouTube video, screenshot or message. Recipe Bank tidies them into clean, simple recipes you can scale, swap, cook hands-free and shop for.</p>
+f'''<main class="scrap">
+<section class="s-hero"><div class="wrap">
+  <div class="s-hero-text">
+    <h1>Every recipe you love, <span class="scribble">in one tin.</span></h1>
+    <p class="lead">The screenshot of that TikTok pasta. Nan's banana bread. The curry off the back of the packet. Recipe Bank reads them all and writes them out as clean, simple recipes you can scale, swap, cook hands-free and shop for.</p>
     <div class="cta">
-      <a class="btn" href="mailto:hello@recipebank.app?subject=Recipe%20Bank%20early%20access">Get early access</a>
-      <a class="btn ghost" href="#features">See what it does</a>
+      <a class="stamp-btn" href="mailto:hello@recipebank.app?subject=Recipe%20Bank%20early%20access">Get early access</a>
+      <span class="aside">{ARROW}free for iPhone,<br>no ads, no account</span>
     </div>
-    <p class="small muted" style="margin-top:14px">Coming to the App Store for iPhone. Free to use.</p>
   </div>
-  <div class="phone"><img src="/assets/shots/recipe.jpg" alt="A recipe in Recipe Bank" width="600" height="1303"></div>
-</div></section>
-
-<section class="band alt" id="features"><div class="wrap">
-  <p class="eyebrow">What it does</p>
-  <h2>From "I saw a recipe somewhere" to dinner on the table.</h2>
-  <div class="features">
-    {feature("🔗", "Save from anywhere", "Share a web page, a YouTube cooking video, an Instagram, TikTok or Facebook post, a screenshot or a photo of a cookbook. Recipe Bank reads it and writes it out properly, no ads or life stories.")}
-    {feature("🔄", "Swap anything", "Tap an ingredient for swaps: out of buttermilk, allergic to nuts, no coriander fans at home. The method and nutrition update with it.")}
-    {feature("🪄", "Make it…", "Dairy-free, gluten-free, high protein, low-carb, keto, diabetes-friendly, vegan, kid-friendly, cheaper or quicker, in one tap. Every change is listed.")}
-    {feature("🎙️", "Cook hands-free", "Big step-by-step cook mode that reads aloud, listens for 'next', 'back' and 'repeat', and starts the timers for you.")}
-    {feature("⏱️", "Cook several dishes at once", "Pick the dishes for dinner and Recipe Bank times them into one plan, so the roast, the veg and the sauce are all ready together.")}
-    {feature("🛒", "Shop at Coles or Woolworths", "Turns your recipes into a shopping list of what to actually buy, with a rough cost, and walks you through adding it to your Coles or Woolworths trolley.")}
-    {feature("💡", "Ideas", "What can I make with chicken, spinach and feta? Photograph the fridge, pick an occasion like a staff morning tea or kids' party, or tell it what the kids will and won't eat.")}
-    {feature("🥗", "Nutrition per serve", "Calories, protein, carbs and fat for every recipe, updated when you change it. Log a meal to Apple Health in a tap.")}
-    {feature("🌏", "Translate", "Cooking with family overseas? Translate a whole recipe, headings, units and all, into Polish, Italian, Greek, Chinese and many more.")}
+  <div class="collage" aria-hidden="true">
+    {polaroid("ragu", "Sunday ragu", "c1")}
+    {polaroid("bananabread", "Nan's banana bread", "c2")}
+    <div class="print tape c3"><img src="/assets/shots/recipe.jpg" alt="" width="600" height="1303"></div>
+    <div class="sticky c4"><b>Saved this week</b><span>✓ that TikTok pasta</span><span>✓ Nan's banana bread</span><span>✓ pumpkin soup (no cream!)</span><span>✓ the good cookies</span></div>
   </div>
 </div></section>
 
-<section class="band"><div class="wrap">
-  <p class="eyebrow">A look inside</p>
-  <h2>Clean, calm and easy to cook from.</h2>
-  <div class="shots">
-    {shot("list", "All your recipes")}
-    {shot("recipe", "Every recipe tidied up")}
-    {shot("swap", "Swaps for any ingredient")}
-    {shot("adapt", "Make it dairy-free and more")}
-    {shot("cook", "Hands-free cook mode")}
-    {shot("ideas", "Ideas for any occasion")}
-    {shot("shopping", "A shopping list that builds itself")}
-    {shot("nutrition", "Nutrition per serve")}
+<section class="s-tin" id="features"><div class="wrap">
+  <h2 class="hand">What's in the tin</h2>
+  <div class="icards">
+    {card(1, "Save it from anywhere", "A website, a YouTube video, an Instagram, TikTok or Facebook post, a screenshot or a photo of a cookbook page. No ads, no life story, just the recipe.")}
+    {card(2, "Swap anything", "Out of buttermilk? Allergic to nuts? Coriander haters at the table? Tap the ingredient. The method and the nutrition change with it.")}
+    {card(3, "Make it…", "Dairy-free, gluten-free, high protein, keto, vegan, kid-friendly, cheaper or quicker, in one tap. Every change is listed so nothing sneaks past you.")}
+    {card(4, "Cook hands-free", "Big steps, read aloud. Say 'next', 'back' or 'repeat' with flour on your hands. The timers start themselves.")}
+    {card(5, "Shop for it", "A list of what to actually buy, with a rough cost, then your Coles or Woolworths trolley right inside the app.")}
+    {card(6, "Ideas when you're stuck", "Chicken, spinach and feta? Photograph the fridge, or pick an occasion: kids' party, staff morning tea, a quiet night in.")}
   </div>
 </div></section>
 
-<section class="band alt"><div class="wrap split">
-  <div>
-    <p class="eyebrow">Web version</p>
-    <h2>Your recipes on the laptop too.</h2>
-    <p class="muted">Turn on the web version in the app's Settings and open your recipe collection in any browser: search it, scale it, print it, or cook from it on the kitchen iPad or laptop.</p>
-    <ul class="check">
-      <li>A private link only you (and whoever you give it to) can open</li>
-      <li>Cook mode with timers in the browser</li>
-      <li>Turn it off and your web copy is deleted</li>
+<section class="s-dinner"><div class="wrap">
+  <div class="dinner-photos" aria-hidden="true">
+    {polaroid("potato", "loaded potatoes", "d1")}
+    {polaroid("chicken", "lemon chicken", "d2")}
+    {polaroid("salad", "peach & burrata", "d3")}
+  </div>
+  <div class="dinner-card">
+    <h2 class="hand">Three dishes, one dinner time.</h2>
+    <p>Pick what's for dinner and when you want to eat. Recipe Bank works backwards and hands you one plan, so nothing's cold and nothing's waiting.</p>
+    <ol class="plan">
+      <li><time>5:15</time>Potatoes into a 200°C oven</li>
+      <li><time>5:35</time>Chicken tray in alongside</li>
+      <li><time>6:10</time>Make the salad, crisp the bacon</li>
+      <li><time>6:20</time>Chicken out to rest, load the potatoes</li>
+      <li><time>6:30</time><b>Dinner</b></li>
+    </ol>
+  </div>
+</div></section>
+
+<section class="s-peek"><div class="wrap">
+  <h2 class="hand">A peek inside</h2>
+  <div class="prints">
+    {shot("list", "all your recipes")}
+    {shot("recipe", "tidied up, no ads")}
+    {shot("swap", "swap any ingredient")}
+    {shot("adapt", "make it dairy-free")}
+    {shot("cook", "hands-free cooking")}
+    {shot("ideas", "ideas for any occasion")}
+    {shot("shopping", "the shopping, sorted")}
+    {shot("nutrition", "nutrition per serve")}
+  </div>
+</div></section>
+
+<section class="s-more"><div class="wrap">
+  <div class="notebook">
+    <h2 class="hand">Also in the tin</h2>
+    <ul>
+      <li><b>Nutrition per serve</b>, updated when you swap, and one tap to log a meal to Apple Health.</li>
+      <li><b>Translate</b> a whole recipe, units and all, for family in Poland, Italy, Greece or China.</li>
+      <li><b>Share a recipe</b> as a link anyone can open, with or without the app.</li>
+      <li><b>On the laptop too.</b> Turn on the web version and cook from the kitchen iPad: search, scale, print, timers. It's a private link, and turning it off deletes the copy.</li>
     </ul>
   </div>
-  <div class="phone" style="max-width:300px;margin:0 auto"><img src="/assets/shots/cook.jpg" alt="Cook mode" loading="lazy" width="600" height="1303"></div>
+  {polaroid("soup", "pumpkin soup, dairy-free", "m1")}
 </div></section>
 
-<section class="band"><div class="narrow" style="text-align:center">
-  <h2>Private by design.</h2>
-  <p class="muted">No account, no ads, no tracking. Your recipes live on your iPhone. Things only leave it when you ask: to read a recipe with AI, to share one, or to switch on the web version. <a href="/privacy/">Read the privacy policy</a>.</p>
-  <p style="margin-top:22px"><a class="btn" href="mailto:hello@recipebank.app?subject=Recipe%20Bank%20early%20access">Get early access</a></p>
+<section class="s-private"><div class="wrap">
+  <div class="stamps" aria-hidden="true"><span>No ads</span><span>No account</span><span>No tracking</span></div>
+  <p>Your recipes live on your iPhone. They only leave it when you ask: to read a recipe with AI, to share one, or to switch on the web version. <a href="/privacy/">The privacy policy</a> says exactly how.</p>
+  <p><a class="stamp-btn" href="mailto:hello@recipebank.app?subject=Recipe%20Bank%20early%20access">Get early access</a></p>
 </div></section>
 </main>
 ''')
